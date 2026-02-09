@@ -249,7 +249,7 @@
     <div class="filters">
       <input id="sizeInput" class="input" placeholder="尺寸（例：205/55R16）" />
       <select id="selBrand" class="input"><option value="">品牌（全部）</option></select>
-      <select id="selPattern" class="input"><option value="">型號（全部）</option></select>
+      <select id="selPattern" class="input"><option value="">花紋（全部）</option></select>
       <select id="selYear" class="input"><option value="">年份（全部）</option></select>
       <button class="btn-yellow" id="btnSearch">查詢</button>
       <button class="btn-gray" id="btnReset">清除</button>
@@ -263,7 +263,7 @@
       <thead>
         <tr>
           <th>品牌</th>
-          <th>型號</th>
+          <th>花紋</th>
           <th>尺寸</th>
           <th>規格</th>
           <th>年份</th>
@@ -390,7 +390,7 @@
     const years = uniq(data.map(d=>d.year)).sort((a,b)=>Number(b)-Number(a));
 
     $("selBrand").innerHTML = `<option value="">品牌（全部）</option>` + brands.map(v=>`<option value="${v}">${v}</option>`).join("");
-    $("selPattern").innerHTML = `<option value="">型號（全部）</option>` + patterns.map(v=>`<option value="${v}">${v}</option>`).join("");
+    $("selPattern").innerHTML = `<option value="">花紋（全部）</option>` + patterns.map(v=>`<option value="${v}">${v}</option>`).join("");
     $("selYear").innerHTML = `<option value="">年份（全部）</option>` + years.map(v=>`<option value="${v}">${v}</option>`).join("");
   }
 
@@ -438,7 +438,7 @@
       const tr = document.createElement("tr");
       tr.innerHTML =
         cell("品牌", brand) +
-        cell("型號", pattern) +
+        cell("花紋", pattern) +
         cell("尺寸", size) +
         cell("規格", spec) +
         cell("年份", year) +
@@ -510,3 +510,4 @@
 </script>
 </body>
 </html>
+
