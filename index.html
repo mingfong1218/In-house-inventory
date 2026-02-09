@@ -73,85 +73,106 @@ button{
   font-size:12px;
 }
 
-/* ===== 表格：對齊修正 ===== */
+/* ===== 表格：全部置中 + 視覺更穩 ===== */
 .table-wrap{ overflow:auto; }
 table{
   width:100%;
   border-collapse:collapse;
   font-size:14px;
-  table-layout: fixed; /* ✅ 讓欄位寬度穩定，避免歪 */
+  table-layout: fixed;
 }
 th,td{
-  padding:10px 12px;
+  padding:12px 10px;
   border-top:1px solid rgba(255,255,255,.07);
   vertical-align: middle;
   line-height: 1.35;
-  white-space: nowrap;          /* ✅ 不要每列自動換行導致高度亂 */
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-variant-numeric: tabular-nums; /* ✅ 數字等寬，表格更整齊 */
+  font-variant-numeric: tabular-nums;
+  text-align:center;            /* ✅ 全部置中 */
 }
 th{
   font-size:12px;
   color:var(--muted);
-  text-align:left;
+  letter-spacing: .5px;
 }
-td.num, th.num{ text-align:right; }
-td.time{ font-variant-numeric: tabular-nums; }
+
+/* 價格顯示 */
 .price{
   color:var(--accent);
   font-weight:900;
 }
+
+/* 更新時間的第二行（原始時間） */
 .sub{
   display:block;
-  margin-top:2px;
+  margin-top:4px;
   font-size:11px;
   color:var(--muted);
 }
 
-/* 欄寬（可依你喜好再調） */
+/* 欄寬（置中後可以更平均一點） */
 .col-brand{ width: 90px; }
-.col-pattern{ width: 140px; }
+.col-pattern{ width: 150px; }
 .col-size{ width: 120px; }
 .col-spec{ width: 90px; }
 .col-year{ width: 70px; }
 .col-qty{ width: 70px; }
-.col-price{ width: 110px; }
-.col-note{ width: 200px; }
-.col-updated{ width: 170px; }
+.col-price{ width: 120px; }
+.col-note{ width: 210px; }
+.col-updated{ width: 190px; }
 
-/* ===== 手機卡片 ===== */
+/* ===== 手機卡片：標籤在上、內容在下（全部置中，不亂） ===== */
 @media(max-width:768px){
   table,thead,tbody,tr,th,td{display:block}
   thead{display:none}
+
   tbody tr{
     background:var(--card-soft);
-    border-radius:14px;
-    margin-bottom:10px;
-    padding:10px 12px;
+    border-radius:16px;
+    margin-bottom:12px;
+    padding:14px 14px;
     border:1px solid rgba(255,255,255,.06);
+    box-shadow:0 10px 25px rgba(0,0,0,.55);
   }
+
   td{
     border:none;
-    padding:2px 0;
-    white-space: normal; /* ✅ 手機允許換行 */
+    padding:10px 6px;
+    white-space: normal;
     overflow: visible;
     text-overflow: clip;
+    text-align:center;          /* ✅ 手機內容也置中 */
   }
+
+  /* 標籤改成「上方一行」 */
   td::before{
     content:attr(data-label);
+    display:block;              /* ✅ 標籤獨立一行 */
+    margin-bottom:6px;
     color:var(--muted);
     font-size:11px;
-    margin-right:6px;
-    display:inline-block;
-    min-width:4em;
+    letter-spacing:.6px;
+  }
+
+  /* 價格在卡片內更有層級 */
+  td[data-label="價格"]{
+    padding-top:14px;
+    padding-bottom:14px;
+  }
+  td[data-label="價格"]::before{
+    margin-bottom:8px;
   }
   td[data-label="價格"]{
-    font-size:18px;
+    font-size:22px;
     font-weight:900;
+  }
+
+  /* 更新時間兩行置中 + 間距 */
+  td[data-label="更新時間"] .sub{
     margin-top:6px;
   }
-  td[data-label="價格"]::before{ content:"價格"; }
 }
 </style>
 </head>
@@ -340,4 +361,5 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
 </body>
 </html>
+
 
