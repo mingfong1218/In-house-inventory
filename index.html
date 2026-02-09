@@ -22,7 +22,7 @@
       background:radial-gradient(circle at top,#162030 0,#05070a 55%);
       color:var(--text);
       font-family:"Noto Sans TC",system-ui,-apple-system;
-      font-size:18px; /* ✅ 桌機整體字大 */
+      font-size:18px;
       line-height:1.55;
     }
     header{
@@ -43,13 +43,14 @@
       padding:16px;
     }
 
+    /* ===== 查詢區 ===== */
     .filters{
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
       gap:12px;
       align-items:end;
     }
-    @media(min-width:880px){
+    @media(min-width:980px){
       .filters{grid-template-columns: 1.2fr 1fr 1fr 1fr auto auto;}
     }
     .input{
@@ -59,16 +60,18 @@
       border:1px solid rgba(255,255,255,.16);
       border-radius:12px;
       padding:11px 12px;
-      font-size:18px; /* ✅ 輸入框字大 */
+      font-size:18px;
       appearance:none;
     }
-    .input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 1px rgba(255,210,51,.35);}
+    .input:focus{
+      outline:none;border-color:var(--accent);
+      box-shadow:0 0 0 1px rgba(255,210,51,.35);
+    }
     button{
-      border:none;
-      border-radius:999px;
+      border:none;border-radius:999px;
       padding:11px 18px;
       font-size:18px;
-      font-weight:800;
+      font-weight:900;
       cursor:pointer;
       white-space:nowrap;
     }
@@ -76,36 +79,57 @@
     .btn-gray{background:#1a2433;color:#fff;}
     .status{margin-top:10px;color:var(--muted);font-size:14px;}
 
-    /* ===== 表格（桌機） ===== */
-    .table-wrap{overflow:auto;}
-    table{width:100%;border-collapse:collapse;table-layout:fixed;}
+    /* ===== 桌機表格：不做橫向滾軸（核心） ===== */
+    .table-wrap{overflow:visible;}                 /* ✅ 不要橫向滾軸 */
+    table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:auto;                           /* ✅ 自動欄寬，讓它自己排 */
+    }
     th,td{
       padding:14px 10px;
       border-top:1px solid rgba(255,255,255,.07);
       text-align:center;
       vertical-align:middle;
       font-variant-numeric: tabular-nums;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      font-size:18px; /* ✅ 表格字大 */
+
+      white-space:normal;                          /* ✅ 允許換行，避免擠出滾軸 */
+      overflow:visible;
+      text-overflow:clip;
+      word-break:keep-all;                         /* ✅ 中文不要亂拆 */
+      overflow-wrap:anywhere;                      /* ✅ 超長字串才必要時斷 */
+      font-size:18px;
     }
-    th{font-size:16px;color:var(--muted);font-weight:700;}
-    .price{color:var(--accent);font-weight:900;font-size:20px;}
-    .sub{display:block;margin-top:4px;font-size:14px;color:var(--muted);}
+    th{
+      font-size:16px;
+      color:var(--muted);
+      font-weight:800;
+    }
+
+    .price{
+      color:var(--accent);
+      font-weight:900;
+      font-size:20px;
+      white-space:nowrap;                          /* 價格不要換行 */
+    }
 
     .qty-low{color:var(--danger);font-weight:900;}
     .qty-out{color:var(--danger);font-weight:900;}
 
-    .col-brand{width:110px}
-    .col-pattern{width:170px}
-    .col-size{width:140px}
-    .col-spec{width:110px}
-    .col-year{width:80px}
-    .col-qty{width:90px}
-    .col-price{width:120px}
-    .col-note{width:220px}
-    .col-updated{width:210px}
+    .sub{
+      display:inline;
+      margin-left:8px;
+      font-size:14px;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    /* 內容包一層，讓我們可控換行策略 */
+    .val{
+      display:inline;
+    }
+    .nowrap{white-space:nowrap;}
+    .note{white-space:normal;}
 
     /* ===== 密碼遮罩 ===== */
     .lock{
@@ -128,63 +152,72 @@
     .lock-row input{flex:1}
     .lock-err{margin-top:10px;color:var(--danger);font-size:14px;display:none;}
 
+    /* ===== 手機：卡片模式（欄位名+內文同一行） ===== */
     @media(max-width:768px){
+      body{font-size:19px;}
+      .input,button{font-size:19px;}
 
-  /* 卡片外觀不動 */
-  tbody tr{
-    background:var(--card-soft);
-    border-radius:16px;
-    margin:10px auto;
-    padding:12px 14px;
-    border:1px solid rgba(255,255,255,.06);
-    box-shadow:0 8px 22px rgba(0,0,0,.55);
-    max-width:560px;
-  }
+      table,thead,tbody,tr,th,td{display:block;}
+      thead{display:none;}
 
-  /* ✅ 每個欄位：固定兩欄同一行（左標籤、右內容） */
-  td{
-    border:none;
-    padding:6px 0;
-    white-space:normal;
-    overflow:visible;
-    text-overflow:clip;
+      tbody tr{
+        background:var(--card-soft);
+        border-radius:16px;
+        margin:10px auto;
+        padding:12px 14px;
+        border:1px solid rgba(255,255,255,.06);
+        box-shadow:0 8px 22px rgba(0,0,0,.55);
+        max-width:560px;
+      }
 
-    display:grid !important;                 /* ✅ 強制用 grid */
-    grid-template-columns: 84px 1fr;         /* 左欄寬度可調 */
-    column-gap:12px;
-    align-items:baseline;
-    text-align:left !important;
-  }
+      /* ✅ 每個欄位一列：左標籤｜右內容，同一行 */
+      td{
+        border:none;
+        padding:6px 0;
+        text-align:left;
 
-  /* ✅ 標籤永遠在左欄、同一行 */
-  td::before{
-    content:attr(data-label);
-    display:block !important;                /* grid 的第一欄 */
-    margin:0 !important;
-    color:var(--muted);
-    font-size:15px;
-    letter-spacing:.5px;
-  }
+        display:grid;
+        grid-template-columns: 84px 1fr;
+        column-gap:12px;
+        align-items:baseline;
 
-  /* ✅ 右欄內容：直接放右邊，不換到下一行（除非內容太長才自動換行） */
-  td[data-label]{
-    /* no-op, 保留選擇器 */
-  }
+        white-space:normal;
+        overflow:visible;
+        text-overflow:clip;
+        word-break:keep-all;
+        overflow-wrap:anywhere;
+      }
 
-  /* ✅ 牌價：同一行顯示（不要置中、不要跨欄） */
-  td[data-label="牌價"]{
-    font-size:22px;
-    font-weight:900;
-  }
+      td::before{
+        content:attr(data-label);
+        color:var(--muted);
+        font-size:15px;
+        letter-spacing:.5px;
+        margin:0;
+      }
 
-  /* ✅ 更新時間：同一行顯示「xx分鐘前」，日期再縮排到右欄下一行 */
-  td[data-label="更新時間"] .sub{
-    grid-column:2;                           /* ✅ 第二行仍在右欄 */
-    margin-top:2px;
-    font-size:15px;
-    color:var(--muted);
-  }
-}
+      /* 值在右欄：預設不強制換行（除非真的太長） */
+      .val{font-size:19px;}
+      .nowrap{white-space:nowrap;}
+      .note{white-space:normal;}
+
+      /* 牌價：同一行但更醒目 */
+      td[data-label="牌價"] .val{
+        color:var(--accent);
+        font-weight:900;
+        font-size:24px;
+        white-space:nowrap;
+      }
+
+      /* 更新時間：同一行顯示（分鐘前 + 日期都一行） */
+      td[data-label="更新時間"] .sub{
+        display:inline;
+        margin-left:8px;
+        font-size:15px;
+        color:var(--muted);
+        white-space:nowrap;
+      }
+    }
   </style>
 </head>
 
@@ -229,15 +262,15 @@
     <table>
       <thead>
         <tr>
-          <th class="col-brand">品牌</th>
-          <th class="col-pattern">型號</th>
-          <th class="col-size">尺寸</th>
-          <th class="col-spec">規格</th>
-          <th class="col-year">年份</th>
-          <th class="col-qty">數量</th>
-          <th class="col-price">牌價</th>
-          <th class="col-note">備註</th>
-          <th class="col-updated">更新時間</th>
+          <th>品牌</th>
+          <th>型號</th>
+          <th>尺寸</th>
+          <th>規格</th>
+          <th>年份</th>
+          <th>數量</th>
+          <th>牌價</th>
+          <th>備註</th>
+          <th>更新時間</th>
         </tr>
       </thead>
       <tbody id="rows"></tbody>
@@ -255,7 +288,7 @@
   let data = [];
   const $ = (id) => document.getElementById(id);
 
-  /* ===== 密碼（前端簡易保護）===== */
+  /* ===== 密碼（前端簡易門禁）===== */
   const PASS = "1218";
   const LOCK_KEY = "mf_inventory_unlocked";
 
@@ -296,17 +329,14 @@
   // 2) "Date(2026,1,9,18,56,50)"
   function parseUpdatedAt(x){
     if(!x) return null;
-
-    // GViz 可能直接給 Date(...) 或已是 Date 物件
     if (x instanceof Date) return x;
 
     const s = String(x).trim();
 
-    // Date(YYYY,MM,DD,HH,mm,ss)
     const m1 = s.match(/^Date\((\d{4}),(\d{1,2}),(\d{1,2}),(\d{1,2}),(\d{1,2})(?:,(\d{1,2}))?\)$/);
     if(m1){
       const Y = Number(m1[1]);
-      const Mo = Number(m1[2]); // 注意：這裡通常是 0-11
+      const Mo = Number(m1[2]); // 0-11
       const D = Number(m1[3]);
       const h = Number(m1[4]);
       const mi = Number(m1[5]);
@@ -314,14 +344,12 @@
       return new Date(Y, Mo, D, h, mi, se);
     }
 
-    // yyyy-MM-dd HH:mm
     const m2 = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
     if(m2){
       const Y=+m2[1], Mo=+m2[2]-1, D=+m2[3], h=+m2[4], mi=+m2[5];
       return new Date(Y, Mo, D, h, mi, 0);
     }
 
-    // 最後嘗試
     const d = new Date(s);
     return isNaN(d.getTime()) ? null : d;
   }
@@ -348,12 +376,12 @@
 
   function qtyTextAndClass(qtyRaw){
     const n = Number(String(qtyRaw).replace(/[^\d\-]/g,""));
-    if(!qtyRaw && qtyRaw !== 0) return {text:"", cls:""};
-    if(Number.isNaN(n)) return {text:String(qtyRaw), cls:""};
+    if(qtyRaw === "" || qtyRaw === null || qtyRaw === undefined) return {text:"", cls:"", num: null};
+    if(Number.isNaN(n)) return {text:String(qtyRaw), cls:"", num: null};
 
-    if(n <= 0) return {text:"售完", cls:"qty-out"};
-    if(n < 4) return {text:String(n), cls:"qty-low"};
-    return {text:String(n), cls:""};
+    if(n <= 0) return {text:"售完", cls:"qty-out", num: 0};
+    if(n < 4) return {text:String(n), cls:"qty-low", num: n};
+    return {text:String(n), cls:"", num: n};
   }
 
   function fillFilters(){
@@ -366,12 +394,25 @@
     $("selYear").innerHTML = `<option value="">年份（全部）</option>` + years.map(v=>`<option value="${v}">${v}</option>`).join("");
   }
 
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function cell(label, valueHtml){
+    return `<td data-label="${label}">${valueHtml}</td>`;
+  }
+
   function render(rows){
     const body = $("rows");
     body.innerHTML = "";
 
     if(!rows.length){
-      body.innerHTML = `<tr><td colspan="9" style="color:var(--muted);padding:16px;">查無符合條件的資料</td></tr>`;
+      body.innerHTML = `<tr><td style="color:var(--muted);padding:16px;text-align:center;">查無符合條件的資料</td></tr>`;
       return;
     }
 
@@ -382,21 +423,30 @@
 
       const q = qtyTextAndClass(o.qty);
 
+      const brand = `<span class="val nowrap">${escapeHtml(o.brand || "")}</span>`;
+      const pattern = `<span class="val nowrap">${escapeHtml(o.pattern || "")}</span>`;
+      const size = `<span class="val nowrap">${escapeHtml(o.size || "")}</span>`;
+      const spec = `<span class="val nowrap">${escapeHtml(o.spec || "")}</span>`;
+      const year = `<span class="val nowrap">${escapeHtml(o.year || "")}</span>`;
+      const qty = `<span class="val nowrap ${q.cls}">${escapeHtml(q.text)}</span>`;
+      const price = `<span class="val nowrap price">${escapeHtml(formatMoney(o.Price))}</span>`;
+      const note = `<span class="val note">${escapeHtml(o.note || "")}</span>`;
+
+      // ✅ 更新時間：同一行呈現（分鐘前 + 日期）
+      const updated = `<span class="val nowrap">${escapeHtml(ago || "")}<span class="sub">(${escapeHtml(dtText || "")})</span></span>`;
+
       const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td class="col-brand" data-label="品牌">${o.brand || ""}</td>
-        <td class="col-pattern" data-label="型號">${o.pattern || ""}</td>
-        <td class="col-size" data-label="尺寸">${o.size || ""}</td>
-        <td class="col-spec" data-label="規格">${o.spec || ""}</td>
-        <td class="col-year" data-label="年份">${o.year || ""}</td>
-        <td class="col-qty ${q.cls}" data-label="數量">${q.text}</td>
-        <td class="col-price price" data-label="牌價">${formatMoney(o.Price)}</td>
-        <td class="col-note" data-label="備註">${o.note || ""}</td>
-        <td class="col-updated" data-label="更新時間">
-          ${ago ? `${ago}` : ``}
-          <span class="sub">${dtText || ""}</span>
-        </td>
-      `;
+      tr.innerHTML =
+        cell("品牌", brand) +
+        cell("型號", pattern) +
+        cell("尺寸", size) +
+        cell("規格", spec) +
+        cell("年份", year) +
+        cell("數量", qty) +
+        cell("牌價", price) +
+        cell("備註", note) +
+        cell("更新時間", updated);
+
       body.appendChild(tr);
     }
   }
@@ -437,7 +487,6 @@
       data = rows.map(r=>{
         const o = {};
         (r.c || []).forEach((cell, i)=>{
-          // 重要：cell.v 可能是 Date(...) 物件型態或字串
           o[cols[i]] = cell ? (cell.v != null ? cell.v : "") : "";
         });
         return o;
@@ -461,5 +510,3 @@
 </script>
 </body>
 </html>
-
-
