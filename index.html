@@ -292,18 +292,17 @@
   const PASS = "1218";
   const LOCK_KEY = "mf_inventory_unlocked";
 
-  function unlockOk(){
-    localStorage.setItem(LOCK_KEY, "1");
-    $("lock").style.display = "none";
-  }
-  function lockInit(){
-    if(localStorage.getItem(LOCK_KEY) === "1"){
-      $("lock").style.display = "none";
-      return;
-    }
-    $("pw").addEventListener("keydown", (e)=>{ if(e.key==="Enter") tryUnlock(); });
-    $("btnUnlock").addEventListener("click", tryUnlock);
-  }
+function unlockOk(){
+  $("lock").style.display = "none";
+}
+
+function lockInit(){
+  $("lock").style.display = "flex"; // ✅ 每次都顯示密碼畫面
+  $("pw").value = "";
+
+  $("pw").addEventListener("keydown", (e)=>{ if(e.key==="Enter") tryUnlock(); });
+  $("btnUnlock").addEventListener("click", tryUnlock);
+}
   function tryUnlock(){
     const v = $("pw").value.trim();
     if(v === PASS){
@@ -510,4 +509,5 @@
 </script>
 </body>
 </html>
+
 
