@@ -1,252 +1,454 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>銘峰輪業｜內部庫存</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>銘峰輪業｜內部庫存快查</title>
 
-<style>
-:root{
-  --bg:#05070a;
-  --card:#10151e;
-  --card-soft:#151c27;
-  --text:#e9f0f6;
-  --muted:#9bb0c0;
-  --accent:#ffd233;
-  --border:#263142;
-}
+  <style>
+    :root{
+      --bg:#05070a;
+      --card:#10151e;
+      --card-soft:#151c27;
+      --text:#e9f0f6;
+      --muted:#9bb0c0;
+      --accent:#ffd233;
+      --border:#263142;
+      --danger:#ff4d4d;
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      background:radial-gradient(circle at top,#162030 0,#05070a 55%);
+      color:var(--text);
+      font-family:"Noto Sans TC",system-ui,-apple-system;
+      font-size:18px; /* ✅ 桌機整體字大 */
+      line-height:1.55;
+    }
+    header{
+      position:sticky;top:0;z-index:20;
+      background:rgba(5,7,10,.92);
+      border-bottom:1px solid rgba(255,255,255,.06);
+      backdrop-filter: blur(10px);
+    }
+    .wrap{max-width:1200px;margin:auto;padding:14px 18px;}
+    h1{margin:0;font-size:22px;font-weight:900;letter-spacing:2px;}
 
-/* ===== 基本 ===== */
-*{box-sizing:border-box}
-body{
-  margin:0;
-  background:radial-gradient(circle at top,#162030 0,#05070a 55%);
-  color:var(--text);
-  font-family:"Noto Sans TC",system-ui,-apple-system;
-  font-size:18px;               /* ✅ 全站字體放大（桌機） */
-  line-height:1.5;
-}
+    .card{
+      background:rgba(10,14,20,.98);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      box-shadow:0 15px 40px rgba(0,0,0,.7);
+      margin:18px auto;
+      padding:16px;
+    }
 
-header{
-  position:sticky;
-  top:0;
-  z-index:10;
-  background:rgba(5,7,10,.9);
-  border-bottom:1px solid rgba(255,255,255,.06);
-  backdrop-filter: blur(10px);
-}
-.wrap{
-  max-width:1200px;
-  margin:auto;
-  padding:14px 18px;
-}
-h1{
-  margin:0;
-  font-size:22px;               /* ✅ 標題更大 */
-  font-weight:900;
-  letter-spacing:2px;
-}
+    .filters{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+      align-items:end;
+    }
+    @media(min-width:880px){
+      .filters{grid-template-columns: 1.2fr 1fr 1fr 1fr auto auto;}
+    }
+    .input{
+      width:100%;
+      background:#050811;
+      color:#fff;
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:12px;
+      padding:11px 12px;
+      font-size:18px; /* ✅ 輸入框字大 */
+      appearance:none;
+    }
+    .input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 1px rgba(255,210,51,.35);}
+    button{
+      border:none;
+      border-radius:999px;
+      padding:11px 18px;
+      font-size:18px;
+      font-weight:800;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .btn-yellow{background:var(--accent);color:#111;}
+    .btn-gray{background:#1a2433;color:#fff;}
+    .status{margin-top:10px;color:var(--muted);font-size:14px;}
 
-/* ===== 卡片 ===== */
-.card{
-  background:rgba(10,14,20,.98);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:18px;
-  box-shadow:0 15px 40px rgba(0,0,0,.7);
-  margin:18px auto;
-  padding:16px;
-}
+    /* ===== 表格（桌機） ===== */
+    .table-wrap{overflow:auto;}
+    table{width:100%;border-collapse:collapse;table-layout:fixed;}
+    th,td{
+      padding:14px 10px;
+      border-top:1px solid rgba(255,255,255,.07);
+      text-align:center;
+      vertical-align:middle;
+      font-variant-numeric: tabular-nums;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      font-size:18px; /* ✅ 表格字大 */
+    }
+    th{font-size:16px;color:var(--muted);font-weight:700;}
+    .price{color:var(--accent);font-weight:900;font-size:20px;}
+    .sub{display:block;margin-top:4px;font-size:14px;color:var(--muted);}
 
-/* ===== 表格（桌機） ===== */
-.table-wrap{ overflow:auto; }
+    .qty-low{color:var(--danger);font-weight:900;}
+    .qty-out{color:var(--danger);font-weight:900;}
 
-table{
-  width:100%;
-  border-collapse:collapse;
-  table-layout:fixed;
-}
+    .col-brand{width:110px}
+    .col-pattern{width:170px}
+    .col-size{width:140px}
+    .col-spec{width:110px}
+    .col-year{width:80px}
+    .col-qty{width:90px}
+    .col-price{width:120px}
+    .col-note{width:220px}
+    .col-updated{width:210px}
 
-th,td{
-  padding:14px 10px;            /* ✅ 行高略放大但不鬆散 */
-  border-top:1px solid rgba(255,255,255,.07);
-  text-align:center;
-  vertical-align:middle;
-  font-size:18px;               /* ✅ 桌機表格字體放大 */
-}
+    /* ===== 密碼遮罩 ===== */
+    .lock{
+      position:fixed;inset:0;z-index:9999;
+      display:flex;align-items:center;justify-content:center;
+      background:radial-gradient(circle at top,#101826 0,#05070a 60%);
+      padding:18px;
+    }
+    .lock-card{
+      width:min(520px, 100%);
+      background:rgba(10,14,20,.98);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:18px;
+      box-shadow:0 18px 50px rgba(0,0,0,.8);
+      padding:18px;
+    }
+    .lock-title{font-size:20px;font-weight:900;letter-spacing:1px;margin-bottom:10px;}
+    .lock-hint{color:var(--muted);font-size:14px;margin-bottom:12px;}
+    .lock-row{display:flex;gap:10px;align-items:center;}
+    .lock-row input{flex:1}
+    .lock-err{margin-top:10px;color:var(--danger);font-size:14px;display:none;}
 
-th{
-  font-size:16px;               /* 表頭稍小但清楚 */
-  color:var(--muted);
-  font-weight:600;
-}
+    /* ===== 手機卡片（穩定不跑版） ===== */
+    @media(max-width:768px){
+      body{font-size:19px;}
+      .input,button{font-size:19px;}
+      th,td{font-size:19px;}
 
-.price{
-  color:var(--accent);
-  font-weight:900;
-  font-size:20px;
-}
+      table,thead,tbody,tr,th,td{display:block;}
+      thead{display:none;}
 
-.sub{
-  display:block;
-  margin-top:4px;
-  font-size:14px;
-  color:var(--muted);
-}
+      tbody tr{
+        background:var(--card-soft);
+        border-radius:16px;
+        margin:10px auto;
+        padding:12px 14px;
+        border:1px solid rgba(255,255,255,.06);
+        box-shadow:0 8px 22px rgba(0,0,0,.55);
+        max-width:560px; /* ✅ 不佔滿 */
+      }
 
-/* 欄寬（桌機） */
-.col-brand{width:90px}
-.col-pattern{width:150px}
-.col-size{width:130px}
-.col-spec{width:90px}
-.col-year{width:80px}
-.col-qty{width:80px}
-.col-price{width:120px}
-.col-note{width:220px}
-.col-updated{width:200px}
+      td{
+        border:none;
+        padding:6px 0;
+        text-align:left;
+        white-space:normal;
+        overflow:visible;
+        text-overflow:clip;
+      }
+      td::before{
+        content:attr(data-label);
+        display:block;
+        margin-bottom:2px;
+        font-size:15px;
+        color:var(--muted);
+        letter-spacing:.5px;
+      }
+      td[data-label="牌價"]{
+        text-align:center;
+        padding:10px 0;
+        font-size:26px;
+        font-weight:900;
+      }
+      td[data-label="牌價"]::before{ text-align:center; margin-bottom:4px; }
 
-/* ===== 手機：穩定版卡片（字大但不胖） ===== */
-@media (max-width:768px){
-
-  body{
-    font-size:19px;             /* ✅ 手機整體再大一點 */
-  }
-
-  table,thead,tbody,tr,th,td{
-    display:block;
-  }
-  thead{display:none}
-
-  tbody tr{
-    background:var(--card-soft);
-    border-radius:16px;
-    margin:10px auto;           /* ✅ 卡片間距變小 */
-    padding:12px 14px;          /* ✅ 卡片內距縮小 */
-    border:1px solid rgba(255,255,255,.06);
-    box-shadow:0 8px 22px rgba(0,0,0,.55);
-    max-width:520px;            /* ✅ 卡片不佔滿整個螢幕 */
-  }
-
-  td{
-    border:none;
-    padding:6px 0;              /* ✅ 行距收緊 */
-    text-align:left;
-    font-size:19px;             /* ✅ 卡片內容字體放大 */
-    line-height:1.45;
-  }
-
-  td::before{
-    content:attr(data-label);
-    display:block;
-    margin-bottom:2px;
-    font-size:15px;             /* ✅ 標籤字體放大 */
-    color:var(--muted);
-    letter-spacing:.5px;
-  }
-
-  /* 牌價：獨立強調，但不拉高整張卡 */
-  td[data-label="牌價"]{
-    text-align:center;
-    padding:10px 0;
-    font-size:24px;
-    font-weight:900;
-  }
-  td[data-label="牌價"]::before{
-    text-align:center;
-    margin-bottom:4px;
-  }
-
-  /* 更新時間 */
-  td[data-label="更新時間"] .sub{
-    font-size:15px;
-    margin-top:2px;
-  }
-}
-</style>
+      td[data-label="更新時間"] .sub{
+        font-size:15px;
+        margin-top:2px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
+<!-- 🔒 密碼遮罩 -->
+<div class="lock" id="lock">
+  <div class="lock-card">
+    <div class="lock-title">內部庫存系統</div>
+    <div class="lock-hint">請輸入密碼後查看（僅供內部同仁）。</div>
+    <div class="lock-row">
+      <input id="pw" class="input" type="password" inputmode="numeric" placeholder="輸入密碼" />
+      <button id="btnUnlock" class="btn-yellow">進入</button>
+    </div>
+    <div class="lock-err" id="lockErr">密碼錯誤</div>
+  </div>
+</div>
+
 <header>
   <div class="wrap">
-    <h1>銘峰輪業｜內部庫存</h1>
+    <h1>銘峰輪業｜內部庫存快查</h1>
   </div>
 </header>
 
 <main class="wrap">
 
-<section class="card table-wrap">
-<table>
-<thead>
-<tr>
-  <th class="col-brand">品牌</th>
-  <th class="col-pattern">型號</th>
-  <th class="col-size">尺寸</th>
-  <th class="col-spec">規格</th>
-  <th class="col-year">年份</th>
-  <th class="col-qty">數量</th>
-  <th class="col-price">牌價</th>
-  <th class="col-note">備註</th>
-  <th class="col-updated">更新時間</th>
-</tr>
-</thead>
-<tbody id="rows"></tbody>
-</table>
-</section>
+  <!-- 查詢卡片 -->
+  <section class="card">
+    <div class="filters">
+      <input id="sizeInput" class="input" placeholder="尺寸（例：205/55R16）" />
+      <select id="selBrand" class="input"><option value="">品牌（全部）</option></select>
+      <select id="selPattern" class="input"><option value="">型號（全部）</option></select>
+      <select id="selYear" class="input"><option value="">年份（全部）</option></select>
+      <button class="btn-yellow" id="btnSearch">查詢</button>
+      <button class="btn-gray" id="btnReset">清除</button>
+    </div>
+    <div class="status" id="statusText">載入中…</div>
+  </section>
+
+  <!-- 結果 -->
+  <section class="card table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-brand">品牌</th>
+          <th class="col-pattern">型號</th>
+          <th class="col-size">尺寸</th>
+          <th class="col-spec">規格</th>
+          <th class="col-year">年份</th>
+          <th class="col-qty">數量</th>
+          <th class="col-price">牌價</th>
+          <th class="col-note">備註</th>
+          <th class="col-updated">更新時間</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </section>
 
 </main>
 
 <script>
-/* ===== Google Sheet 設定 ===== */
-const SHEET_ID = "1sML4xO1ukPsoXyeU7ygRakjupdp4ZthQL7mXTCdNpUM";
-const GID = "0";
-const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
+  /* ===== Google Sheet ===== */
+  const SHEET_ID = "1sML4xO1ukPsoXyeU7ygRakjupdp4ZthQL7mXTCdNpUM";
+  const GID = "0";
+  const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
 
-const rowsEl = document.getElementById("rows");
+  let data = [];
+  const $ = (id) => document.getElementById(id);
 
-function money(v){
-  const n = Number(v);
-  if (Number.isNaN(n)) return v || "";
-  return "＄" + n.toLocaleString("zh-Hant");
-}
+  /* ===== 密碼（前端簡易保護）===== */
+  const PASS = "1218";
+  const LOCK_KEY = "mf_inventory_unlocked";
 
-function timeAgo(s){
-  if(!s) return "";
-  const d = new Date(s.replace(" ","T"));
-  const m = Math.floor((Date.now()-d)/60000);
-  if(m<1) return "剛剛";
-  if(m<60) return `${m} 分鐘前`;
-  const h = Math.floor(m/60);
-  if(h<24) return `${h} 小時前`;
-  return `${Math.floor(h/24)} 天前`;
-}
+  function unlockOk(){
+    localStorage.setItem(LOCK_KEY, "1");
+    $("lock").style.display = "none";
+  }
+  function lockInit(){
+    if(localStorage.getItem(LOCK_KEY) === "1"){
+      $("lock").style.display = "none";
+      return;
+    }
+    $("pw").addEventListener("keydown", (e)=>{ if(e.key==="Enter") tryUnlock(); });
+    $("btnUnlock").addEventListener("click", tryUnlock);
+  }
+  function tryUnlock(){
+    const v = $("pw").value.trim();
+    if(v === PASS){
+      $("lockErr").style.display = "none";
+      unlockOk();
+    }else{
+      $("lockErr").style.display = "block";
+    }
+  }
 
-fetch(URL)
-.then(r=>r.text())
-.then(t=>{
-  const json = JSON.parse(t.substring(t.indexOf("{"), t.lastIndexOf("}")+1));
-  const cols = json.table.cols.map(c=>c.label);
-  json.table.rows.forEach(r=>{
-    const o={};
-    r.c.forEach((c,i)=>o[cols[i]]=c?c.v:"");
-    const tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td data-label="品牌">${o.brand||""}</td>
-      <td data-label="型號">${o.pattern||""}</td>
-      <td data-label="尺寸">${o.size||""}</td>
-      <td data-label="規格">${o.spec||""}</td>
-      <td data-label="年份">${o.year||""}</td>
-      <td data-label="數量">${o.qty||""}</td>
-      <td data-label="牌價" class="price">${money(o.Price)}</td>
-      <td data-label="備註">${o.note||""}</td>
-      <td data-label="更新時間">
-        ${timeAgo(o.updatedAt)}
-        <span class="sub">${o.updatedAt||""}</span>
-      </td>
-    `;
-    rowsEl.appendChild(tr);
+  /* ===== 工具 ===== */
+  function uniq(arr){ return [...new Set(arr.filter(v => v !== "" && v != null))]; }
+
+  function formatMoney(v){
+    if(v === null || v === undefined || v === "") return "";
+    const n = Number(String(v).replace(/[,\s]/g,""));
+    if(Number.isNaN(n)) return String(v);
+    return "＄" + n.toLocaleString("zh-Hant", { maximumFractionDigits: 0 });
+  }
+
+  // 支援兩種格式：
+  // 1) "2026-02-09 18:56"
+  // 2) "Date(2026,1,9,18,56,50)"
+  function parseUpdatedAt(x){
+    if(!x) return null;
+
+    // GViz 可能直接給 Date(...) 或已是 Date 物件
+    if (x instanceof Date) return x;
+
+    const s = String(x).trim();
+
+    // Date(YYYY,MM,DD,HH,mm,ss)
+    const m1 = s.match(/^Date\((\d{4}),(\d{1,2}),(\d{1,2}),(\d{1,2}),(\d{1,2})(?:,(\d{1,2}))?\)$/);
+    if(m1){
+      const Y = Number(m1[1]);
+      const Mo = Number(m1[2]); // 注意：這裡通常是 0-11
+      const D = Number(m1[3]);
+      const h = Number(m1[4]);
+      const mi = Number(m1[5]);
+      const se = Number(m1[6] || 0);
+      return new Date(Y, Mo, D, h, mi, se);
+    }
+
+    // yyyy-MM-dd HH:mm
+    const m2 = s.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+    if(m2){
+      const Y=+m2[1], Mo=+m2[2]-1, D=+m2[3], h=+m2[4], mi=+m2[5];
+      return new Date(Y, Mo, D, h, mi, 0);
+    }
+
+    // 最後嘗試
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function timeAgo(dt){
+    if(!dt) return "";
+    const diff = Date.now() - dt.getTime();
+    if(diff < 0) return "剛剛";
+    const min = Math.floor(diff/60000);
+    if(min < 1) return "剛剛";
+    if(min < 60) return `${min} 分鐘前`;
+    const hr = Math.floor(min/60);
+    if(hr < 24) return `${hr} 小時前`;
+    const day = Math.floor(hr/24);
+    if(day === 1) return "昨天";
+    return `${day} 天前`;
+  }
+
+  function fmtDate(dt){
+    if(!dt) return "";
+    const pad = (n)=>String(n).padStart(2,"0");
+    return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+  }
+
+  function qtyTextAndClass(qtyRaw){
+    const n = Number(String(qtyRaw).replace(/[^\d\-]/g,""));
+    if(!qtyRaw && qtyRaw !== 0) return {text:"", cls:""};
+    if(Number.isNaN(n)) return {text:String(qtyRaw), cls:""};
+
+    if(n <= 0) return {text:"售完", cls:"qty-out"};
+    if(n < 4) return {text:String(n), cls:"qty-low"};
+    return {text:String(n), cls:""};
+  }
+
+  function fillFilters(){
+    const brands = uniq(data.map(d=>d.brand)).sort();
+    const patterns = uniq(data.map(d=>d.pattern)).sort();
+    const years = uniq(data.map(d=>d.year)).sort((a,b)=>Number(b)-Number(a));
+
+    $("selBrand").innerHTML = `<option value="">品牌（全部）</option>` + brands.map(v=>`<option value="${v}">${v}</option>`).join("");
+    $("selPattern").innerHTML = `<option value="">型號（全部）</option>` + patterns.map(v=>`<option value="${v}">${v}</option>`).join("");
+    $("selYear").innerHTML = `<option value="">年份（全部）</option>` + years.map(v=>`<option value="${v}">${v}</option>`).join("");
+  }
+
+  function render(rows){
+    const body = $("rows");
+    body.innerHTML = "";
+
+    if(!rows.length){
+      body.innerHTML = `<tr><td colspan="9" style="color:var(--muted);padding:16px;">查無符合條件的資料</td></tr>`;
+      return;
+    }
+
+    for(const o of rows){
+      const dt = parseUpdatedAt(o.updatedAt);
+      const ago = timeAgo(dt);
+      const dtText = fmtDate(dt);
+
+      const q = qtyTextAndClass(o.qty);
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td class="col-brand" data-label="品牌">${o.brand || ""}</td>
+        <td class="col-pattern" data-label="型號">${o.pattern || ""}</td>
+        <td class="col-size" data-label="尺寸">${o.size || ""}</td>
+        <td class="col-spec" data-label="規格">${o.spec || ""}</td>
+        <td class="col-year" data-label="年份">${o.year || ""}</td>
+        <td class="col-qty ${q.cls}" data-label="數量">${q.text}</td>
+        <td class="col-price price" data-label="牌價">${formatMoney(o.Price)}</td>
+        <td class="col-note" data-label="備註">${o.note || ""}</td>
+        <td class="col-updated" data-label="更新時間">
+          ${ago ? `${ago}` : ``}
+          <span class="sub">${dtText || ""}</span>
+        </td>
+      `;
+      body.appendChild(tr);
+    }
+  }
+
+  function search(){
+    const sizeQ = $("sizeInput").value.trim();
+    const b = $("selBrand").value;
+    const p = $("selPattern").value;
+    const y = $("selYear").value;
+
+    let rows = data.slice();
+    if(b) rows = rows.filter(x=>x.brand===b);
+    if(p) rows = rows.filter(x=>x.pattern===p);
+    if(y) rows = rows.filter(x=>String(x.year)===String(y));
+    if(sizeQ) rows = rows.filter(x=>String(x.size||"").includes(sizeQ));
+
+    render(rows);
+  }
+
+  function resetAll(){
+    $("sizeInput").value = "";
+    $("selBrand").value = "";
+    $("selPattern").value = "";
+    $("selYear").value = "";
+    render(data);
+  }
+
+  async function load(){
+    const status = $("statusText");
+    try{
+      status.textContent = "讀取資料中…";
+      const text = await (await fetch(URL)).text();
+      const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}")+1));
+
+      const cols = (json.table.cols || []).map((c, i) => (c.label || c.id || ("COL"+i)).trim());
+      const rows = json.table.rows || [];
+
+      data = rows.map(r=>{
+        const o = {};
+        (r.c || []).forEach((cell, i)=>{
+          // 重要：cell.v 可能是 Date(...) 物件型態或字串
+          o[cols[i]] = cell ? (cell.v != null ? cell.v : "") : "";
+        });
+        return o;
+      });
+
+      status.textContent = `已載入 ${data.length} 筆。`;
+      fillFilters();
+      render(data);
+    }catch(e){
+      console.error(e);
+      status.textContent = "讀取失敗：請確認 Google Sheet 分享權限為「知道連結者可檢視」。";
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", ()=>{
+    lockInit();
+    $("btnSearch").addEventListener("click", search);
+    $("btnReset").addEventListener("click", resetAll);
+    load();
   });
-});
 </script>
-
 </body>
 </html>
