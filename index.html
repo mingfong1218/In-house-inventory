@@ -146,36 +146,73 @@
         box-shadow:0 8px 22px rgba(0,0,0,.55);
         max-width:560px; /* ✅ 不佔滿 */
       }
+     /* ===== 手機：標籤＋內容同一行（更省高度） ===== */
+td{
+  border:none;
+  padding:6px 0;
+  text-align:left;
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
 
-      td{
-        border:none;
-        padding:6px 0;
-        text-align:left;
-        white-space:normal;
-        overflow:visible;
-        text-overflow:clip;
-      }
-      td::before{
-        content:attr(data-label);
-        display:block;
-        margin-bottom:2px;
-        font-size:15px;
-        color:var(--muted);
-        letter-spacing:.5px;
-      }
-      td[data-label="牌價"]{
-        text-align:center;
-        padding:10px 0;
-        font-size:26px;
-        font-weight:900;
-      }
-      td[data-label="牌價"]::before{ text-align:center; margin-bottom:4px; }
+  display:flex;              /* ✅ 同一行 */
+  gap:10px;
+  align-items:baseline;
+}
 
-      td[data-label="更新時間"] .sub{
-        font-size:15px;
-        margin-top:2px;
-      }
-    }
+td::before{
+  content:attr(data-label);
+  display:inline-block;      /* ✅ 不換行 */
+  min-width:84px;            /* ✅ 左欄固定寬，整齊對齊 */
+  color:var(--muted);
+  font-size:15px;
+  letter-spacing:.5px;
+}
+
+/* 內容區（讓文字吃滿右側，長字會自然換行） */
+td{
+  /* 讓內容可換行 */
+}
+td > *{
+  /* 有 span 的欄位（更新時間）也穩 */
+}
+td{
+  flex-wrap:wrap;
+}
+td::before{
+  flex:0 0 84px;
+}
+td{
+  /* 內容會在剩餘空間 */
+}
+td{
+  /* 這行不必加，但保留清晰 */
+}
+
+/* 牌價：仍然突出，但改成同一行形式 */
+td[data-label="牌價"]{
+  display:flex;
+  align-items:baseline;
+  justify-content:flex-start;
+  padding:10px 0;
+  font-size:24px;
+  font-weight:900;
+}
+td[data-label="牌價"]::before{
+  min-width:84px;
+}
+
+/* 更新時間：讓第二行縮排對齊內容區 */
+td[data-label="更新時間"]{
+  align-items:flex-start;
+}
+td[data-label="更新時間"] .sub{
+  display:block;
+  margin-left:84px;          /* ✅ 對齊右側內容 */
+  margin-top:2px;
+  font-size:15px;
+  color:var(--muted);
+}
   </style>
 </head>
 
@@ -452,3 +489,4 @@
 </script>
 </body>
 </html>
+
