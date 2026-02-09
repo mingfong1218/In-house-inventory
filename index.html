@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>銘峰輪業｜內部庫存快查</title>
+
+<style>
+:root{
+  --bg:#05070a;
+  --card:#10151e;
+  --card-soft:#151c27;
+  --text:#e9f0f6;
+  --muted:#9bb0c0;
+  --accent:#ffd233;
+  --border:#263142;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:radial-gradient(circle at top,#162030 0,#05070a 55%);
+  color:var(--text);
+  font-family:"Noto Sans TC",system-ui,-apple-system;
+}
+header{
+  position:sticky;top:0;z-index:10;
+  background:rgba(5,7,10,.9);
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.wrap{max-width:1100px;margin:auto;padding:14px 18px}
+h1{margin:0;font-size:20px;font-weight:900;letter-spacing:2px}
+
+.card{
+  background:rgba(10,14,20,.98);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;
+  box-shadow:0 15px 40px rgba(0,0,0,.7);
+  margin:16px auto;
+  padding:14px;
+}
+.input{
+  width:100%;
+  background:#050811;
+  color:#fff;
+  border:1px solid rgba(255,255,255,.16);
+  border-radius:10px;
+  padding:9px 12px;
+  font-size:14px;
+}
+.input:focus{
+  outline:none;
+  border-color:var(--accent);
+}
+.filters{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+@media(min-width:720px){
+  .filters{grid-template-columns:repeat(5,1fr)}
+}
+button{
+  border:none;
+  border-radius:999px;
+  padding:8px 18px;
+  font-weight:700;
+  cursor:pointer;
+}
+.btn-yellow{background:var(--accent);color:#111}
+.btn-gray{background:#1a2433;color:#fff}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+}
+th,td{
+  padding:8px 10px;
+  border-top:1px solid rgba(255,255,255,.07);
+}
+th{
+  font-size:12px;
+  color:var(--muted);
+}
+.price{
+  color:var(--accent);
+  font-weight:800;
+}
+
+/* ===== 手機卡片 ===== */
+@media(max-width:768px){
+  table,thead,tbody,tr,th,td{display:block}
+  thead{display:none}
+  tbody tr{
+    background:var(--card-soft);
+    border-radius:14px;
+    margin-bottom:10px;
+    padding:10px;
+    border:1px solid rgba(255,255,255,.06);
+  }
+  td{border:none;padding:2px 0}
+  td::before{
+    content:attr(data-label);
+    color:var(--muted);
+    font-size:11px;
+    margin-right:6px;
+  }
+  td[data-label="價格"]{
+    font-size:18px;
+    font-weight:900;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>銘峰輪業｜內部庫存快查</h1>
+  </div>
+</header>
+
+<main class="wrap">
+
+<section class="card">
+  <input id="sizeInput" class="input" placeholder="尺寸（例：205/55R16）">
+  <div class="filters">
+    <select id="selBrand" class="input"><option value="">品牌</option></select>
+    <select id="selPattern" class="input"><option value="">型號</option></select>
+    <select id="selYear" class="input"><option value="">年份</option></select>
+    <select id="selQty" class="input"><option value="">庫存</option></select>
+    <button class="btn-yellow" onclick="search()">查詢</button>
+  </div>
+</section>
+
+<section class="card">
+<table>
+<thead>
+<tr>
+<th>品牌</th>
+<th>型號</th>
+<th>尺寸</th>
+<th>規格</th>
+<th>年份</th>
+<th>數量</th>
+<th>價格</th>
+<th>備註</th>
+<th>更新時間</th>
+</tr>
+</thead>
+<tbody id="rows"></tbody>
+</table>
+</section>
+
+</main>
+
+<script>
+/* ===== 你的 Google Sheet ===== */
+const SHEET_ID = "1sML4xO1ukPsoXyeU7ygRakjupdp4ZthQL7mXTCdNpUM";
+const GID = "0";
+const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
+
+let data=[];
+
+fetch(URL).then(r=>r.text()).then(t=>{
+  const json = JSON.parse(t.substring(t.indexOf("{"), t.lastIndexOf("}")+1));
+  const cols = json.table.cols.map(c=>c.label);
+  data = json.table.rows.map(r=>{
+    const o={};
+    r.c.forEach((c,i)=>o[cols[i]]=c?.f||c?.v||"");
+    return o;
+  });
+  render(data);
+  fill();
+});
+
+function render(arr){
+  rows.innerHTML="";
+  arr.forEach(r=>{
+    rows.innerHTML+=`
+<tr>
+<td data-label="品牌">${r.brand||""}</td>
+<td data-label="型號">${r.pattern||""}</td>
+<td data-label="尺寸">${r.size||""}</td>
+<td data-label="規格">${r.spec||""}</td>
+<td data-label="年份">${r.year||""}</td>
+<td data-label="數量">${r.qty||""}</td>
+<td data-label="價格" class="price">＄${r.Price||""}</td>
+<td data-label="備註">${r.note||""}</td>
+<td data-label="更新時間">${r.updatedAt||""}</td>
+</tr>`;
+  });
+}
+
+function fill(){
+  const uniq=(k)=>[...new Set(data.map(d=>d[k]).filter(Boolean))];
+  selBrand.innerHTML+=uniq("brand").map(v=>`<option>${v}</option>`).join("");
+  selPattern.innerHTML+=uniq("pattern").map(v=>`<option>${v}</option>`).join("");
+  selYear.innerHTML+=uniq("year").map(v=>`<option>${v}</option>`).join("");
+}
+
+function search(){
+  let r=[...data];
+  if(selBrand.value) r=r.filter(x=>x.brand===selBrand.value);
+  if(selPattern.value) r=r.filter(x=>x.pattern===selPattern.value);
+  if(selYear.value) r=r.filter(x=>x.year===selYear.value);
+  if(sizeInput.value) r=r.filter(x=>x.size?.includes(sizeInput.value));
+  render(r);
+}
+</script>
+
+</body>
+</html>
