@@ -125,43 +125,58 @@ th{
 
 /* ===== 手機卡片：標籤在上、內容在下（全部置中，不亂） ===== */
 @media(max-width:768px){
+  /* ✅ 取消桌機欄寬（歪的主因） */
+  .col-brand,.col-pattern,.col-size,.col-spec,.col-year,.col-qty,.col-price,.col-note,.col-updated{
+    width:auto !important;
+  }
+
   table,thead,tbody,tr,th,td{display:block}
   thead{display:none}
 
   tbody tr{
     background:var(--card-soft);
-    border-radius:16px;
+    border-radius:18px;
     margin-bottom:12px;
     padding:14px 14px;
     border:1px solid rgba(255,255,255,.06);
     box-shadow:0 10px 25px rgba(0,0,0,.55);
   }
 
+  /* ✅ 每一列（一個欄位）做成「標籤｜內容」兩欄，視覺就不會飄 */
   td{
     border:none;
     padding:10px 6px;
     white-space: normal;
     overflow: visible;
     text-overflow: clip;
-    text-align:center;          /* ✅ 手機內容也置中 */
+
+    display:grid;
+    grid-template-columns: 82px 1fr;
+    column-gap:12px;
+    align-items:baseline;
   }
 
-  /* 標籤改成「上方一行」 */
   td::before{
     content:attr(data-label);
-    display:block;              /* ✅ 標籤獨立一行 */
-    margin-bottom:6px;
     color:var(--muted);
-    font-size:11px;
+    font-size:12px;
     letter-spacing:.6px;
+    text-align:left;
   }
 
-  /* 價格在卡片內更有層級 */
+  /* ✅ 內容統一靠左，整張卡會非常整齊 */
+  td{
+    text-align:left;
+  }
+
+  /* 價格：跨欄放大（更像你想要的重點資訊） */
   td[data-label="價格"]{
-    padding-top:14px;
-    padding-bottom:14px;
+    grid-template-columns: 1fr;
+    text-align:center;
+    padding:16px 6px;
   }
   td[data-label="價格"]::before{
+    justify-self:center;
     margin-bottom:8px;
   }
   td[data-label="價格"]{
@@ -169,7 +184,7 @@ th{
     font-weight:900;
   }
 
-  /* 更新時間兩行置中 + 間距 */
+  /* 更新時間：保留兩行，但靠左對齊不亂 */
   td[data-label="更新時間"] .sub{
     margin-top:6px;
   }
@@ -361,5 +376,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
 </body>
 </html>
+
 
 
