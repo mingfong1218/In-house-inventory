@@ -98,7 +98,7 @@ th{
   letter-spacing: .5px;
 }
 
-/* 價格顯示 */
+/* 牌價顯示 */
 .price{
   color:var(--accent);
   font-weight:900;
@@ -125,68 +125,32 @@ th{
 
 /* ===== 手機卡片：標籤在上、內容在下（全部置中，不亂） ===== */
 @media(max-width:768px){
-  /* ✅ 取消桌機欄寬（歪的主因） */
-  .col-brand,.col-pattern,.col-size,.col-spec,.col-year,.col-qty,.col-price,.col-note,.col-updated{
-    width:auto !important;
-  }
 
-  table,thead,tbody,tr,th,td{display:block}
-  thead{display:none}
+  /* ✅ 整體字體變大（老花友善） */
+  body{ font-size:18px; }
+  td{ font-size:18px; }
+  td::before{ font-size:14px; }
 
+  /* ✅ 卡片變窄 + 一頁顯示更多 */
   tbody tr{
-    background:var(--card-soft);
-    border-radius:18px;
-    margin-bottom:12px;
-    padding:14px 14px;
-    border:1px solid rgba(255,255,255,.06);
-    box-shadow:0 10px 25px rgba(0,0,0,.55);
+    max-width: 520px;     /* 你覺得太寬就再降到 480 */
+    margin: 10px auto;    /* 置中但不佔滿 */
+    padding: 12px 12px;   /* 內距縮小 */
   }
 
-  /* ✅ 每一列（一個欄位）做成「標籤｜內容」兩欄，視覺就不會飄 */
+  /* ✅ 行高/行距更緊（看更多筆） */
   td{
-    border:none;
-    padding:10px 6px;
-    white-space: normal;
-    overflow: visible;
-    text-overflow: clip;
-
-    display:grid;
-    grid-template-columns: 82px 1fr;
-    column-gap:12px;
-    align-items:baseline;
+    padding: 7px 4px;     /* 原本太大，改小 */
+    row-gap: 6px;         /* 如果你用 grid 兩欄，這會影響垂直間距 */
   }
 
-  td::before{
-    content:attr(data-label);
-    color:var(--muted);
-    font-size:12px;
-    letter-spacing:.6px;
-    text-align:left;
-  }
-
-  /* ✅ 內容統一靠左，整張卡會非常整齊 */
-  td{
-    text-align:left;
-  }
-
-  /* 價格：跨欄放大（更像你想要的重點資訊） */
-  td[data-label="價格"]{
-    grid-template-columns: 1fr;
-    text-align:center;
-    padding:16px 6px;
-  }
-  td[data-label="價格"]::before{
-    justify-self:center;
-    margin-bottom:8px;
-  }
-  td[data-label="價格"]{
+  /* ✅ 牌價仍然突出，但不要佔太多高度 */
+  td[data-label="牌價"]{
+    padding: 10px 4px;
     font-size:22px;
-    font-weight:900;
   }
-
-  /* 更新時間：保留兩行，但靠左對齊不亂 */
-  td[data-label="更新時間"] .sub{
-    margin-top:6px;
+  td[data-label="牌價"]::before{
+    margin-bottom:6px;
   }
 }
 </style>
@@ -224,7 +188,7 @@ th{
         <th class="col-spec">規格</th>
         <th class="col-year num">年份</th>
         <th class="col-qty num">數量</th>
-        <th class="col-price num">價格</th>
+        <th class="col-price num">牌價</th>
         <th class="col-note">備註</th>
         <th class="col-updated">更新時間</th>
       </tr>
@@ -297,7 +261,7 @@ function render(arr){
       <td class="col-spec" data-label="規格">${r.spec || ""}</td>
       <td class="col-year num" data-label="年份">${r.year || ""}</td>
       <td class="col-qty num" data-label="數量">${r.qty || ""}</td>
-      <td class="col-price num price" data-label="價格">${formatMoney(r.Price)}</td>
+      <td class="col-price num price" data-label="牌價">${formatMoney(r.Price)}</td>
       <td class="col-note" data-label="備註">${r.note || ""}</td>
       <td class="col-updated time" data-label="更新時間">
         ${ago ? `<span>${ago}</span>` : ``}
@@ -376,6 +340,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
 </body>
 </html>
+
 
 
 
