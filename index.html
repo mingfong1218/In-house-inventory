@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>銘峰輪業｜內部庫存</title>
+<title>銘峰輪業｜內部庫存快查</title>
 
 <style>
 :root{
@@ -26,8 +26,9 @@ header{
   position:sticky;top:0;z-index:10;
   background:rgba(5,7,10,.9);
   border-bottom:1px solid rgba(255,255,255,.06);
+  backdrop-filter: blur(10px);
 }
-.wrap{max-width:1100px;margin:auto;padding:14px 18px}
+.wrap{max-width:1180px;margin:auto;padding:14px 18px}
 h1{margin:0;font-size:20px;font-weight:900;letter-spacing:2px}
 
 .card{
@@ -47,17 +48,14 @@ h1{margin:0;font-size:20px;font-weight:900;letter-spacing:2px}
   padding:9px 12px;
   font-size:14px;
 }
-.input:focus{
-  outline:none;
-  border-color:var(--accent);
-}
+.input:focus{outline:none;border-color:var(--accent)}
 .filters{
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:10px;
 }
 @media(min-width:720px){
-  .filters{grid-template-columns:repeat(5,1fr)}
+  .filters{grid-template-columns:repeat(6,1fr)}
 }
 button{
   border:none;
@@ -69,23 +67,58 @@ button{
 .btn-yellow{background:var(--accent);color:#111}
 .btn-gray{background:#1a2433;color:#fff}
 
+.status{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+/* ===== 表格：對齊修正 ===== */
+.table-wrap{ overflow:auto; }
 table{
   width:100%;
   border-collapse:collapse;
   font-size:14px;
+  table-layout: fixed; /* ✅ 讓欄位寬度穩定，避免歪 */
 }
 th,td{
-  padding:8px 10px;
+  padding:10px 12px;
   border-top:1px solid rgba(255,255,255,.07);
+  vertical-align: middle;
+  line-height: 1.35;
+  white-space: nowrap;          /* ✅ 不要每列自動換行導致高度亂 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums; /* ✅ 數字等寬，表格更整齊 */
 }
 th{
   font-size:12px;
   color:var(--muted);
+  text-align:left;
 }
+td.num, th.num{ text-align:right; }
+td.time{ font-variant-numeric: tabular-nums; }
 .price{
   color:var(--accent);
-  font-weight:800;
+  font-weight:900;
 }
+.sub{
+  display:block;
+  margin-top:2px;
+  font-size:11px;
+  color:var(--muted);
+}
+
+/* 欄寬（可依你喜好再調） */
+.col-brand{ width: 90px; }
+.col-pattern{ width: 140px; }
+.col-size{ width: 120px; }
+.col-spec{ width: 90px; }
+.col-year{ width: 70px; }
+.col-qty{ width: 70px; }
+.col-price{ width: 110px; }
+.col-note{ width: 200px; }
+.col-updated{ width: 170px; }
 
 /* ===== 手機卡片 ===== */
 @media(max-width:768px){
@@ -95,20 +128,30 @@ th{
     background:var(--card-soft);
     border-radius:14px;
     margin-bottom:10px;
-    padding:10px;
+    padding:10px 12px;
     border:1px solid rgba(255,255,255,.06);
   }
-  td{border:none;padding:2px 0}
+  td{
+    border:none;
+    padding:2px 0;
+    white-space: normal; /* ✅ 手機允許換行 */
+    overflow: visible;
+    text-overflow: clip;
+  }
   td::before{
     content:attr(data-label);
     color:var(--muted);
     font-size:11px;
     margin-right:6px;
+    display:inline-block;
+    min-width:4em;
   }
   td[data-label="價格"]{
     font-size:18px;
     font-weight:900;
+    margin-top:6px;
   }
+  td[data-label="價格"]::before{ content:"價格"; }
 }
 </style>
 </head>
@@ -124,33 +167,34 @@ th{
 <main class="wrap">
 
 <section class="card">
-  <input id="sizeInput" class="input" placeholder="尺寸（例：205/55R16）">
   <div class="filters">
-    <select id="selBrand" class="input"><option value="">品牌</option></select>
-    <select id="selPattern" class="input"><option value="">型號</option></select>
-    <select id="selYear" class="input"><option value="">年份</option></select>
-    <select id="selQty" class="input"><option value="">庫存</option></select>
-    <button class="btn-yellow" onclick="search()">查詢</button>
+    <input id="sizeInput" class="input" placeholder="尺寸（例：205/55R16）" />
+    <select id="selBrand" class="input"><option value="">品牌（全部）</option></select>
+    <select id="selPattern" class="input"><option value="">型號（全部）</option></select>
+    <select id="selYear" class="input"><option value="">年份（全部）</option></select>
+    <button class="btn-yellow" id="btnSearch">查詢</button>
+    <button class="btn-gray" id="btnReset">清除</button>
   </div>
+  <div class="status" id="statusText">載入中…</div>
 </section>
 
-<section class="card">
-<table>
-<thead>
-<tr>
-<th>品牌</th>
-<th>型號</th>
-<th>尺寸</th>
-<th>規格</th>
-<th>年份</th>
-<th>數量</th>
-<th>價格</th>
-<th>備註</th>
-<th>更新時間</th>
-</tr>
-</thead>
-<tbody id="rows"></tbody>
-</table>
+<section class="card table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th class="col-brand">品牌</th>
+        <th class="col-pattern">型號</th>
+        <th class="col-size">尺寸</th>
+        <th class="col-spec">規格</th>
+        <th class="col-year num">年份</th>
+        <th class="col-qty num">數量</th>
+        <th class="col-price num">價格</th>
+        <th class="col-note">備註</th>
+        <th class="col-updated">更新時間</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
 </section>
 
 </main>
@@ -161,55 +205,138 @@ const SHEET_ID = "1sML4xO1ukPsoXyeU7ygRakjupdp4ZthQL7mXTCdNpUM";
 const GID = "0";
 const URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
 
-let data=[];
+let data = [];
 
-fetch(URL).then(r=>r.text()).then(t=>{
-  const json = JSON.parse(t.substring(t.indexOf("{"), t.lastIndexOf("}")+1));
-  const cols = json.table.cols.map(c=>c.label);
-  data = json.table.rows.map(r=>{
-    const o={};
-    r.c.forEach((c,i)=>o[cols[i]]=c?.f||c?.v||"");
-    return o;
-  });
-  render(data);
-  fill();
-});
+const $ = (id) => document.getElementById(id);
 
-function render(arr){
-  rows.innerHTML="";
-  arr.forEach(r=>{
-    rows.innerHTML+=`
-<tr>
-<td data-label="品牌">${r.brand||""}</td>
-<td data-label="型號">${r.pattern||""}</td>
-<td data-label="尺寸">${r.size||""}</td>
-<td data-label="規格">${r.spec||""}</td>
-<td data-label="年份">${r.year||""}</td>
-<td data-label="數量">${r.qty||""}</td>
-<td data-label="價格" class="price">＄${r.Price||""}</td>
-<td data-label="備註">${r.note||""}</td>
-<td data-label="更新時間">${r.updatedAt||""}</td>
-</tr>`;
-  });
+function uniq(arr){ return [...new Set(arr.filter(v => v !== "" && v != null))]; }
+
+function formatMoney(v){
+  if (v === null || v === undefined || v === "") return "";
+  const n = Number(String(v).replace(/[,\s]/g,""));
+  if (Number.isNaN(n)) return String(v);
+  return "＄" + n.toLocaleString("zh-Hant", { maximumFractionDigits: 0 });
 }
 
-function fill(){
-  const uniq=(k)=>[...new Set(data.map(d=>d[k]).filter(Boolean))];
-  selBrand.innerHTML+=uniq("brand").map(v=>`<option>${v}</option>`).join("");
-  selPattern.innerHTML+=uniq("pattern").map(v=>`<option>${v}</option>`).join("");
-  selYear.innerHTML+=uniq("year").map(v=>`<option>${v}</option>`).join("");
+// 解析 "yyyy-MM-dd HH:mm"（你 Apps Script 產出的格式）
+function parseUpdatedAt(s){
+  if(!s) return null;
+  const m = String(s).trim().match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+  if(!m) return null;
+  const [_, Y, M, D, h, mm] = m;
+  return new Date(Number(Y), Number(M)-1, Number(D), Number(h), Number(mm), 0);
+}
+
+function timeAgo(dt){
+  if(!dt) return "";
+  const diffMs = Date.now() - dt.getTime();
+  if (diffMs < 0) return "剛剛";
+  const min = Math.floor(diffMs / 60000);
+  if (min <= 1) return "剛剛";
+  if (min < 60) return `${min} 分鐘前`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr} 小時前`;
+  const day = Math.floor(hr / 24);
+  if (day === 1) return "昨天";
+  return `${day} 天前`;
+}
+
+function render(arr){
+  const body = $("rows");
+  body.innerHTML = "";
+  if(!arr.length){
+    body.innerHTML = `<tr><td colspan="9" style="color:#9bb0c0;">查無符合條件的資料</td></tr>`;
+    return;
+  }
+
+  for(const r of arr){
+    const dt = parseUpdatedAt(r.updatedAt);
+    const ago = timeAgo(dt);
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="col-brand" data-label="品牌">${r.brand || ""}</td>
+      <td class="col-pattern" data-label="型號">${r.pattern || ""}</td>
+      <td class="col-size" data-label="尺寸">${r.size || ""}</td>
+      <td class="col-spec" data-label="規格">${r.spec || ""}</td>
+      <td class="col-year num" data-label="年份">${r.year || ""}</td>
+      <td class="col-qty num" data-label="數量">${r.qty || ""}</td>
+      <td class="col-price num price" data-label="價格">${formatMoney(r.Price)}</td>
+      <td class="col-note" data-label="備註">${r.note || ""}</td>
+      <td class="col-updated time" data-label="更新時間">
+        ${ago ? `<span>${ago}</span>` : ``}
+        ${r.updatedAt ? `<span class="sub">${r.updatedAt}</span>` : ``}
+      </td>
+    `;
+    body.appendChild(tr);
+  }
+}
+
+function fillFilters(){
+  const brands = uniq(data.map(d=>d.brand)).sort();
+  const patterns = uniq(data.map(d=>d.pattern)).sort();
+  const years = uniq(data.map(d=>d.year)).sort((a,b)=>Number(b)-Number(a));
+
+  $("selBrand").innerHTML = `<option value="">品牌（全部）</option>` + brands.map(v=>`<option value="${v}">${v}</option>`).join("");
+  $("selPattern").innerHTML = `<option value="">型號（全部）</option>` + patterns.map(v=>`<option value="${v}">${v}</option>`).join("");
+  $("selYear").innerHTML = `<option value="">年份（全部）</option>` + years.map(v=>`<option value="${v}">${v}</option>`).join("");
 }
 
 function search(){
-  let r=[...data];
-  if(selBrand.value) r=r.filter(x=>x.brand===selBrand.value);
-  if(selPattern.value) r=r.filter(x=>x.pattern===selPattern.value);
-  if(selYear.value) r=r.filter(x=>x.year===selYear.value);
-  if(sizeInput.value) r=r.filter(x=>x.size?.includes(sizeInput.value));
-  render(r);
+  const sizeQ = $("sizeInput").value.trim();
+  const b = $("selBrand").value;
+  const p = $("selPattern").value;
+  const y = $("selYear").value;
+
+  let rows = data.slice();
+  if (b) rows = rows.filter(x => x.brand === b);
+  if (p) rows = rows.filter(x => x.pattern === p);
+  if (y) rows = rows.filter(x => String(x.year) === String(y));
+  if (sizeQ) rows = rows.filter(x => String(x.size||"").includes(sizeQ));
+
+  render(rows);
 }
+
+function resetAll(){
+  $("sizeInput").value = "";
+  $("selBrand").value = "";
+  $("selPattern").value = "";
+  $("selYear").value = "";
+  render(data);
+}
+
+async function load(){
+  const status = $("statusText");
+  try{
+    status.textContent = "讀取資料中…";
+    const text = await (await fetch(URL)).text();
+    const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}")+1));
+
+    const cols = (json.table.cols || []).map((c, i) => (c.label || c.id || ("COL"+i)).trim());
+    const rows = json.table.rows || [];
+    data = rows.map(r=>{
+      const o = {};
+      (r.c || []).forEach((cell, i)=>{
+        o[cols[i]] = cell ? (cell.f != null ? cell.f : cell.v) : "";
+      });
+      return o;
+    });
+
+    status.textContent = `已載入 ${data.length} 筆。`;
+    fillFilters();
+    render(data);
+  }catch(e){
+    console.error(e);
+    status.textContent = "讀取失敗：請確認 Google Sheet 分享權限為「知道連結者可檢視」。";
+  }
+}
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  $("btnSearch").addEventListener("click", search);
+  $("btnReset").addEventListener("click", resetAll);
+  load();
+});
 </script>
 
 </body>
-
 </html>
