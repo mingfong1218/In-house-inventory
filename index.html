@@ -128,90 +128,62 @@
     .lock-row input{flex:1}
     .lock-err{margin-top:10px;color:var(--danger);font-size:14px;display:none;}
 
-    /* ===== 手機卡片（穩定不跑版） ===== */
     @media(max-width:768px){
-      body{font-size:19px;}
-      .input,button{font-size:19px;}
-      th,td{font-size:19px;}
 
-      table,thead,tbody,tr,th,td{display:block;}
-      thead{display:none;}
+  /* 卡片外觀不動 */
+  tbody tr{
+    background:var(--card-soft);
+    border-radius:16px;
+    margin:10px auto;
+    padding:12px 14px;
+    border:1px solid rgba(255,255,255,.06);
+    box-shadow:0 8px 22px rgba(0,0,0,.55);
+    max-width:560px;
+  }
 
-      tbody tr{
-        background:var(--card-soft);
-        border-radius:16px;
-        margin:10px auto;
-        padding:12px 14px;
-        border:1px solid rgba(255,255,255,.06);
-        box-shadow:0 8px 22px rgba(0,0,0,.55);
-        max-width:560px; /* ✅ 不佔滿 */
-      }
-     /* ===== 手機：標籤＋內容同一行（更省高度） ===== */
-td{
-  border:none;
-  padding:6px 0;
-  text-align:left;
-  white-space:normal;
-  overflow:visible;
-  text-overflow:clip;
+  /* ✅ 每個欄位：固定兩欄同一行（左標籤、右內容） */
+  td{
+    border:none;
+    padding:6px 0;
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
 
-  display:flex;              /* ✅ 同一行 */
-  gap:10px;
-  align-items:baseline;
-}
+    display:grid !important;                 /* ✅ 強制用 grid */
+    grid-template-columns: 84px 1fr;         /* 左欄寬度可調 */
+    column-gap:12px;
+    align-items:baseline;
+    text-align:left !important;
+  }
 
-td::before{
-  content:attr(data-label);
-  display:inline-block;      /* ✅ 不換行 */
-  min-width:84px;            /* ✅ 左欄固定寬，整齊對齊 */
-  color:var(--muted);
-  font-size:15px;
-  letter-spacing:.5px;
-}
+  /* ✅ 標籤永遠在左欄、同一行 */
+  td::before{
+    content:attr(data-label);
+    display:block !important;                /* grid 的第一欄 */
+    margin:0 !important;
+    color:var(--muted);
+    font-size:15px;
+    letter-spacing:.5px;
+  }
 
-/* 內容區（讓文字吃滿右側，長字會自然換行） */
-td{
-  /* 讓內容可換行 */
-}
-td > *{
-  /* 有 span 的欄位（更新時間）也穩 */
-}
-td{
-  flex-wrap:wrap;
-}
-td::before{
-  flex:0 0 84px;
-}
-td{
-  /* 內容會在剩餘空間 */
-}
-td{
-  /* 這行不必加，但保留清晰 */
-}
+  /* ✅ 右欄內容：直接放右邊，不換到下一行（除非內容太長才自動換行） */
+  td[data-label]{
+    /* no-op, 保留選擇器 */
+  }
 
-/* 牌價：仍然突出，但改成同一行形式 */
-td[data-label="牌價"]{
-  display:flex;
-  align-items:baseline;
-  justify-content:flex-start;
-  padding:10px 0;
-  font-size:24px;
-  font-weight:900;
-}
-td[data-label="牌價"]::before{
-  min-width:84px;
-}
+  /* ✅ 牌價：同一行顯示（不要置中、不要跨欄） */
+  td[data-label="牌價"]{
+    font-size:22px;
+    font-weight:900;
+  }
 
-/* 更新時間：讓第二行縮排對齊內容區 */
-td[data-label="更新時間"]{
-  align-items:flex-start;
-}
-td[data-label="更新時間"] .sub{
-  display:block;
-  margin-left:84px;          /* ✅ 對齊右側內容 */
-  margin-top:2px;
-  font-size:15px;
-  color:var(--muted);
+  /* ✅ 更新時間：同一行顯示「xx分鐘前」，日期再縮排到右欄下一行 */
+  td[data-label="更新時間"] .sub{
+    grid-column:2;                           /* ✅ 第二行仍在右欄 */
+    margin-top:2px;
+    font-size:15px;
+    color:var(--muted);
+  }
 }
   </style>
 </head>
@@ -489,4 +461,5 @@ td[data-label="更新時間"] .sub{
 </script>
 </body>
 </html>
+
 
