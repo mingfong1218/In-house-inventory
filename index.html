@@ -460,28 +460,46 @@ function tryUnlock(){
     }
   }
 
-  function search(){
-    const sizeQ = $("sizeInput").value.trim();
-    const b = $("selBrand").value;
-    const p = $("selPattern").value;
-    const y = $("selYear").value;
+function normalizeSize(s){
+  if(!s) return "";
+  return String(s)
+    .toUpperCase()
+    .replace(/\s+/g, "")
+    .replace(/ZR/g, "R")
+    .replace(/[^0-9A-Z]/g, "")
+    .replace(/R/g, "");
+}
 
-    let rows = data.slice();
-    if(b) rows = rows.filter(x=>x.brand===b);
-    if(p) rows = rows.filter(x=>x.pattern===p);
-    if(y) rows = rows.filter(x=>String(x.year)===String(y));
-    if(sizeQ) rows = rows.filter(x=>String(x.size||"").includes(sizeQ));
+function search(){
+  const sizeQ = $("sizeInput").value.trim();
+  const b = $("selBrand").value;
+  const p = $("selPattern").value;
+  const y = $("selYear").value;
 
-    render(rows);
+  let rows = data.slice();
+
+  if(b) rows = rows.filter(x=>x.brand===b);
+  if(p) rows = rows.filter(x=>x.pattern===p);
+  if(y) rows = rows.filter(x=>String(x.year)===String(y));
+
+  if(sizeQ){
+    const qNorm = normalizeSize(sizeQ);
+    rows = rows.filter(x=>{
+      const tNorm = normalizeSize(x.size || "");
+      return tNorm.includes(qNorm);
+    });
   }
 
-  function resetAll(){
-    $("sizeInput").value = "";
-    $("selBrand").value = "";
-    $("selPattern").value = "";
-    $("selYear").value = "";
-    render(data);
-  }
+  render(rows);
+}
+
+function resetAll(){
+  $("sizeInput").value = "";
+  $("selBrand").value = "";
+  $("selPattern").value = "";
+  $("selYear").value = "";
+  render(data);
+}
 
   async function load(){
     const status = $("statusText");
@@ -519,6 +537,7 @@ function tryUnlock(){
 </script>
 </body>
 </html>
+
 
 
 
