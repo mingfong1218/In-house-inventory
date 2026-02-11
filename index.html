@@ -288,30 +288,40 @@
   let data = [];
   const $ = (id) => document.getElementById(id);
 
-  /* ===== 密碼（前端簡易門禁）===== */
-  const PASS = "1218";
-  const LOCK_KEY = "mf_inventory_unlocked";
+  /* ===== 密碼（前端簡易門禁：登入一次後記住）===== */
+const PASS = "1218";
+const LOCK_KEY = "mf_inventory_unlocked";
 
 function unlockOk(){
+  localStorage.setItem(LOCK_KEY, "1");   // ✅ 記住已解鎖
   $("lock").style.display = "none";
 }
 
 function lockInit(){
-  $("lock").style.display = "flex"; // ✅ 每次都顯示密碼畫面
+  // 如果之前已解鎖，就不顯示密碼畫面
+  if(localStorage.getItem(LOCK_KEY) === "1"){
+    $("lock").style.display = "none";
+    return;
+  }
+
+  $("lock").style.display = "flex";
   $("pw").value = "";
 
-  $("pw").addEventListener("keydown", (e)=>{ if(e.key==="Enter") tryUnlock(); });
+  $("pw").addEventListener("keydown", (e)=>{
+    if(e.key==="Enter") tryUnlock();
+  });
   $("btnUnlock").addEventListener("click", tryUnlock);
 }
-  function tryUnlock(){
-    const v = $("pw").value.trim();
-    if(v === PASS){
-      $("lockErr").style.display = "none";
-      unlockOk();
-    }else{
-      $("lockErr").style.display = "block";
-    }
+
+function tryUnlock(){
+  const v = $("pw").value.trim();
+  if(v === PASS){
+    $("lockErr").style.display = "none";
+    unlockOk();
+  }else{
+    $("lockErr").style.display = "block";
   }
+}
 
   /* ===== 工具 ===== */
   function uniq(arr){ return [...new Set(arr.filter(v => v !== "" && v != null))]; }
@@ -509,6 +519,7 @@ function lockInit(){
 </script>
 </body>
 </html>
+
 
 
 
