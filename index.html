@@ -201,8 +201,8 @@
       .nowrap{white-space:nowrap;}
       .note{white-space:normal;}
 
-      /* 牌價：同一行但更醒目 */
-      td[data-label="牌價"] .val{
+      /* 成本：同一行但更醒目 */
+      td[data-label="成本"] .val{
         color:var(--accent);
         font-weight:900;
         font-size:24px;
@@ -268,7 +268,7 @@
           <th>規格</th>
           <th>年份</th>
           <th>數量</th>
-          <th>牌價</th>
+          <th>成本</th>
           <th>備註</th>
           <th>更新時間</th>
         </tr>
@@ -452,7 +452,7 @@ function tryUnlock(){
         cell("規格", spec) +
         cell("年份", year) +
         cell("數量", qty) +
-        cell("牌價", price) +
+        cell("成本", price) +
         cell("備註", note) +
         cell("更新時間", updated);
 
